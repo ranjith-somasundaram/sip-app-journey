@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIP App Journey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: black brand bar, white hero, one vertical stage spine (max 1200px) with expandable cards; diagrams inside each card. Strategy brand: orange / black / white + approved greys. Single light theme by choice. */
+:root{
+  color-scheme: light;
+  --orange:#FA660F; --orange-tint:#FFF3EC;
+  --black:#000000; --white:#FFFFFF;
+  --g100:#F2F2F2; --g200:#E4E4E4; --g300:#D2D2D2; --g400:#A8A8A8; --g500:#717171; --g600:#484747;
+  --sand:#D1B4A3; --sand-tint:#F7F0EB;
+  --font:"Inter", Arial, "Helvetica Neue", sans-serif;
+  --r:8px;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:90px}
+body{background:var(--white);color:var(--black);font-family:var(--font);font-size:15.5px;line-height:1.55;margin:0;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 56px}
+h1,h2,h3,h4{font-weight:600;letter-spacing:-.02em;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1200px;margin:0 auto}
+
+/* Brand bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:30;background:var(--black)}
+header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;background:var(--black);color:var(--white);
+  margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px)));padding-inline:max(16px, env(safe-area-inset-left, 0px))}
+.nav .bar{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:space-between;padding-block:12px}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.wordmark{font-weight:700;font-size:22px;letter-spacing:-.04em;color:var(--white);white-space:nowrap}
+.wordmark sup{font-size:.55em;margin-left:1px;top:-.85em;position:relative;vertical-align:baseline}
+.brand .div{width:1px;height:22px;background:var(--g600)}
+.brand .ttl{font-size:14px;color:var(--g300);white-space:nowrap}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.outline{border:1px solid var(--orange);background:transparent;color:var(--orange);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-weight:500}
+.outline:hover{background:var(--orange);color:var(--white)}
+
+/* Hero */
+.hero{padding-block:44px 28px;display:grid;gap:14px}
+.hero h1{font-size:clamp(30px,5vw,56px);line-height:1.05;max-width:20ch}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{margin:0;color:var(--g600);max-width:64ch;font-size:17px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--g500);margin-top:4px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.sw.p{background:var(--orange)}.sw.c{background:var(--black)}.sw.d{background:var(--sand)}
+
+/* Spine */
+.spine{position:relative;display:grid;gap:16px;padding-left:40px}
+.spine::before{content:"";position:absolute;left:13px;top:8px;bottom:8px;width:2px;background:var(--g200)}
+.spine .fill{position:absolute;left:13px;top:8px;width:2px;background:var(--orange);height:0;transition:height .15s linear}
+
+.stage{position:relative;background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.05);border-top:3px solid transparent;transition:opacity .25s,border-color .2s,box-shadow .2s}
+.stage:hover{border-top-color:var(--orange)}
+.stage.open{box-shadow:0 8px 28px rgba(0,0,0,.07);border-top-color:var(--orange)}
+.stage::before{content:attr(data-n);position:absolute;left:-40px;top:16px;width:28px;height:28px;border-radius:50%;font-weight:600;font-size:12.5px;line-height:28px;text-align:center;background:var(--mk);color:var(--mk-fg);font-variant-numeric:tabular-nums}
+.stage[data-owner="platform"]{--mk-t:#B9470A;--mk:var(--orange);--mk-fg:var(--white);--bd-bg:var(--orange-tint);--bd-fg:#B9470A}
+.stage[data-owner="code"]{--mk-t:var(--black);--mk:var(--black);--mk-fg:var(--white);--bd-bg:var(--black);--bd-fg:var(--white)}
+.stage[data-owner="data"]{--mk-t:var(--g600);--mk:var(--sand);--mk-fg:var(--black);--bd-bg:var(--sand-tint);--bd-fg:var(--g600)}
+.stage.current{box-shadow:0 0 0 3px rgba(250,102,15,.25)}
+.head{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;text-align:left;background:none;border:0;padding:15px 18px;cursor:pointer}
+.head h2{font-size:20px}
+.head .sum{grid-column:1/-1;color:var(--g500);font-size:14.5px}
+.hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.who{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--bd-bg);color:var(--bd-fg);white-space:nowrap}
+.where{font-size:11.5px;color:var(--g500);border:1px solid var(--g200);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.chev{width:16px;height:16px;transition:transform .2s;color:var(--g500);flex:none}
+.stage.open .chev{transform:rotate(180deg)}
+.body{padding:2px 18px 20px;display:grid;gap:16px}
+.body ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.body li{max-width:76ch}
+.body li b{font-weight:600}
+.key{border-left:4px solid var(--orange);background:var(--orange-tint);padding:11px 14px;border-radius:0 8px 8px 0;font-weight:500;max-width:80ch}
+.note{font-size:13px;color:var(--g500)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:5px;background:var(--g100);border:1px solid var(--g200);margin:1px 2px 1px 0}
+.tag.o{background:var(--orange-tint);border-color:#F8C9AC;color:#B9470A}
+.sub{font-size:13px;font-weight:600;color:var(--g600);margin-bottom:-6px}
+
+
+/* Generic figure */
+.fig{border:1px solid var(--g200);border-radius:var(--r);background:var(--g100);padding:14px;display:grid;gap:10px}
+.fig .cap{font-size:12.5px;color:var(--g500)}
+.fig .ttl{font-size:13px;font-weight:600}
+.scroll{overflow-x:auto}
+.scroll svg{display:block;width:100%;min-width:600px;height:auto}
+.flow{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-12}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}.spine .fill{transition:none}}
+
+/* UI-style tabs (mirrors SIP Studio screens) */
+.ui{border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;background:var(--white)}
+.ui .uibar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--g100);border-bottom:1px solid var(--g200);font-size:12px;color:var(--g500)}
+.ui .uibar i{width:8px;height:8px;border-radius:50%;background:var(--g300);display:inline-block}
+.ui .tl{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--g200);padding:0 8px}
+.ui .tl button{border:0;background:none;padding:9px 11px;font-size:13px;color:var(--g500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.ui .tl button[aria-selected="true"]{color:var(--black);border-color:var(--orange);font-weight:600}
+.ui .tp{padding:14px 16px;min-height:110px}
+.ui .tp h4{font-size:15px;margin-bottom:6px}
+.ui .tp p{margin:0 0 6px;max-width:76ch}
+
+/* Studio nav strip */
+.studio{display:grid;grid-template-columns:200px minmax(0,1fr);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden}
+@media (max-width:700px){.studio{grid-template-columns:minmax(0,1fr)}}
+.studio nav{background:var(--black);color:var(--g300);padding:12px 8px;display:grid;gap:2px;align-content:start}
+.studio nav .lbl{font-size:11px;color:var(--g500);padding:4px 10px 6px}
+.studio nav button{border:0;background:none;text-align:left;padding:7px 10px;border-radius:6px;font-size:13.5px;cursor:pointer;color:var(--g300)}
+.studio nav button[aria-selected="true"]{background:#1d1d1d;color:var(--white);box-shadow:inset 3px 0 0 var(--orange)}
+.studio .sp{padding:14px 16px;background:var(--white)}
+.studio .sp h4{font-size:15px;margin-bottom:6px}
+.studio .sp p{margin:0 0 6px;max-width:72ch}
+@media (max-width:700px){.studio nav{grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto}.studio nav .lbl{display:none}}
+
+/* Stepper */
+.stepper{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+@media (max-width:640px){.stepper{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{border:1px solid var(--g200);background:var(--white);border-radius:8px;padding:8px 9px;cursor:pointer;text-align:left;display:grid;gap:1px}
+.step .n{font-size:11px;color:var(--g500);font-variant-numeric:tabular-nums}
+.step .t{font-weight:600;font-size:13.5px}
+.step[aria-selected="true"]{border-color:var(--black);background:var(--black);color:var(--white)}
+.step[aria-selected="true"] .n{color:var(--orange)}
+.steppanel{border:1px solid var(--g200);border-radius:8px;padding:12px 14px;min-height:118px;background:var(--white)}
+.steppanel h4{font-size:15px;margin-bottom:6px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.trio{grid-template-columns:minmax(0,1fr)}}
+.trio div{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;font-size:14px}
+.trio b{display:block;font-weight:600;color:var(--orange);margin-bottom:2px}
+
+/* App anatomy */
+.anat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.anat{grid-template-columns:minmax(0,1fr)}}
+.anat div{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;font-size:14px}
+.anat div b{display:block;font-weight:600}
+.anat .wide{grid-column:1/-1;background:var(--black);color:var(--white);border-color:var(--black)}
+.anat .wide b{color:var(--orange)}
+.anat .db{background:var(--sand-tint);border-color:var(--sand)}
+
+/* Pipeline chevrons */
+.pipe{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.pipe span{position:relative;background:var(--white);border:1px solid var(--g300);border-radius:6px;padding:7px 11px;font-size:13px;font-weight:500}
+.pipe span.o{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.pipe span.k{background:var(--black);border-color:var(--black);color:var(--white)}
+.pipe i{align-self:center;color:var(--g400);font-style:normal}
+.inputs{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Layer stack */
+.stack{display:grid;gap:6px}
+.layer{display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px;align-items:center;border-radius:8px;padding:10px 12px;background:var(--white);border:1px solid var(--g200)}
+@media (max-width:600px){.layer{grid-template-columns:minmax(0,1fr)}}
+.layer b{font-weight:600}
+.layer.l1{border-left:4px solid var(--orange)}
+.layer.l2{border-left:4px solid var(--g600)}
+.layer.l3{border-left:4px solid var(--black)}
+.layer.l4{border-left:4px solid var(--sand)}
+.link{font-size:12px;color:var(--g500);padding-left:182px}
+@media (max-width:600px){.link{padding-left:12px}}
+
+/* Policy fan-out */
+.fan{display:grid;grid-template-columns:minmax(0,1.1fr) auto minmax(0,1fr);gap:12px;align-items:center}
+@media (max-width:640px){.fan{grid-template-columns:minmax(0,1fr)}.fan .arrow{transform:rotate(90deg);justify-self:center}}
+.pol{background:var(--black);color:var(--white);border-radius:8px;padding:12px 14px;font-size:14px}
+.pol b{color:var(--orange);display:block;font-weight:600}
+.apps{display:grid;gap:6px}
+.apps div{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:8px 12px;font-size:14px;display:flex;justify-content:space-between;gap:10px}
+.apps em{font-style:normal;font-size:12px;font-weight:600;color:#B9470A}
+.arrow{color:var(--orange);font-size:22px}
+
+/* Workflow nodes */
+.wf{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.node{background:var(--white);border:1px solid var(--g300);border-radius:8px;padding:9px 12px;font-size:14px;min-width:150px}
+.node small{display:block;font-size:11.5px;color:var(--g500)}
+.node.rd{border-left:4px solid var(--g600)}
+.node.ac{border-left:4px solid var(--orange)}
+.node.nt{border-left:4px solid var(--black)}
+.wf i{color:var(--g400);font-style:normal}
+
+/* Sentinel tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:800px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tiles div{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.tiles b{display:block;font-weight:600;margin-bottom:2px}
+
+/* Centrepiece */
+.centre{border-radius:var(--r);padding:20px;background:var(--g100);display:grid;gap:10px;margin-left:-40px;border:1px solid var(--g200)}
+.centre h2{font-size:26px}
+.centre h2 em{font-style:normal;color:var(--orange)}
+.centre p{margin:0;color:var(--g600);max-width:70ch}
+.blk{cursor:help}
+
+
+
+/* Hero panel */
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.overview{margin-bottom:36px;background:var(--g100);border:1px solid var(--g200);border-radius:14px;padding:clamp(16px,3vw,28px);display:grid;gap:14px;position:relative;overflow:hidden}
+.overview::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--orange)}
+.ov-top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.ov-top > div{display:grid;gap:6px;min-width:0}
+.ov-top h2{font-size:clamp(22px,3vw,30px)}
+.ov-top h2 em{font-style:normal;color:var(--orange)}
+.ov-top p{margin:0;color:var(--g600);max-width:62ch}
+.layers{display:grid;gap:8px;position:relative}
+.lyr{display:grid;grid-template-columns:210px minmax(0,1fr);gap:12px;align-items:center;border-radius:10px;padding:13px 15px;border:1px solid var(--g200);background:var(--white);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,opacity .35s;animation:lyrIn .7s cubic-bezier(.2,.8,.2,1) both}
+.lyr:nth-child(2){animation-delay:.08s}.lyr:nth-child(3){animation-delay:.16s}.lyr:nth-child(4){animation-delay:.24s}
+@keyframes lyrIn{from{transform:translateY(10px);opacity:.35}to{transform:none;opacity:1}}
+@media (max-width:640px){.lyr{grid-template-columns:minmax(0,1fr)}}
+.lyr .nm b{display:block;font-weight:600;font-size:15.5px}
+.lyr .nm span{font-size:12.5px;color:var(--g500)}
+.lyr .cs{display:flex;flex-wrap:wrap;gap:6px}
+.lyr .cs button{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--g100);border:1px solid var(--g200);cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.lyr .cs button:hover,.lyr .cs button:focus-visible{transform:translateY(-2px)}
+.lyr.exp{border-style:dashed}
+.lyr.exp .cs button:hover{border-color:var(--orange)}
+.lyr.app{background:var(--black);border-color:var(--black);color:var(--white)}
+.lyr.app .nm span{color:var(--g400)}
+.lyr.app .cs button{background:#1d1d1d;border-color:var(--g600);color:var(--white)}
+.lyr.app .cs button:hover{border-color:var(--orange)}
+.lyr.plat{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.lyr.plat .nm span{color:#FFE3D2}
+.lyr.plat .cs button{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45);color:var(--white)}
+.lyr.plat .cs button:hover{background:rgba(255,255,255,.28)}
+.lyr.dat{background:var(--sand-tint);border-color:var(--sand)}
+.lyr.dat .cs button{background:var(--white);border-color:var(--sand)}
+.lyr.dat .cs button:hover{border-color:var(--orange)}
+.stage.reveal{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.centre.reveal{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{transform:translateY(16px);opacity:.55}to{transform:none;opacity:1}}
+.stage.flash{box-shadow:0 0 0 3px rgba(250,102,15,.45),0 8px 28px rgba(0,0,0,.07)}
+@media (prefers-reduced-motion:reduce){.lyr,.stage.reveal,.centre.reveal{animation:none}}
+
+/* Four checks */
+.checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;counter-reset:chk}
+@media (max-width:760px){.checks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.checks div{background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:10px 12px;font-size:13.5px;position:relative}
+.checks div b{display:block;font-weight:600;margin-bottom:2px}
+.checks div b::before{counter-increment:chk;content:counter(chk);display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--orange);color:var(--white);font-size:11.5px;line-height:20px;text-align:center;margin-right:7px;font-variant-numeric:tabular-nums}
+
+/* Shared model matrix */
+.matrix{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;min-width:620px}
+.matrix th,.matrix td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--g200)}
+.matrix thead th{background:var(--black);color:var(--white);font-weight:600}
+.matrix thead th:first-child{border-radius:8px 0 0 0}
+.matrix thead th:last-child{border-radius:0 8px 0 0}
+.matrix tbody th{font-weight:600;color:var(--orange);white-space:nowrap;background:var(--white)}
+.matrix tbody tr:nth-child(even) td,.matrix tbody tr:nth-child(even) th{background:var(--g100)}
+.matrix td{background:var(--white)}
+
+/* ---------- Motion & navigation ---------- */
+.stage::before{background:var(--white)!important;color:var(--mk-t)!important;box-shadow:inset 0 0 0 2px var(--mk);transition:background .35s,color .35s,transform .35s}
+.stage.passed::before,.stage.active::before{background:var(--mk)!important;color:var(--mk-fg)!important}
+.stage.active::before{transform:scale(1.12);animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{box-shadow:inset 0 0 0 2px var(--mk),0 0 0 0 rgba(250,102,15,.45)}70%{box-shadow:inset 0 0 0 2px var(--mk),0 0 0 10px rgba(250,102,15,0)}100%{box-shadow:inset 0 0 0 2px var(--mk),0 0 0 0 rgba(250,102,15,0)}}
+.stage{transition:opacity .25s,border-color .2s,box-shadow .3s,transform .3s}
+.stage:not(.open):hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.07)}
+.head h2{transition:color .2s}
+.stage:hover .head h2{color:var(--orange)}
+
+/* phase labels on the spine */
+.phase{position:relative;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--g500);margin-top:14px}
+.phase::before{content:"";position:absolute;left:-31px;width:10px;height:10px;border-radius:2px;transform:rotate(45deg);background:var(--g300)}
+.phase::after{content:"";flex:1;height:1px;background:var(--g200)}
+.phase:first-of-type{margin-top:0}
+
+@media (prefers-reduced-motion:reduce){.stage.active::before{animation:none;transform:none}.stage:not(.open):hover{transform:none}}
+#tip{position:fixed;z-index:50;max-width:290px;background:var(--black);color:var(--white);font-size:12.5px;line-height:1.45;padding:8px 10px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}
+footer{margin-top:28px;font-size:12.5px;color:var(--g500);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+.kbd{font-size:11px;border:1px solid var(--g300);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--white)}
+</style>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<header class="nav">
+  <div class="bar">
+    <div class="brand">
+      <span class="wordmark" aria-label="Strategy">Strategy<sup>₿</sup></span>
+      <span class="div"></span>
+      <span class="ttl">SIP app journey</span>
+    </div>
+    <div class="controls">
+            <button class="outline" id="expandAll">Expand all</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h1>From a SaaS system to a <em>Strategy App</em> on SIP</h1>
+    <p>What happens, in order, when we replace a system like Salesforce. The app is generated as customer-owned code. SIP then adds the semantic layer, ontology, governance, workflows and observability on top of the same database.</p>
+    <div class="legend">
+      <span><i class="sw p"></i>Strategy platform (SIP)</span>
+      <span><i class="sw c"></i>Customer code</span>
+      <span><i class="sw d"></i>Customer data</span>
+    </div>
+  </section>
+
+  <section class="overview" aria-labelledby="ov-h">
+    <div class="ov-top">
+      <div>
+        <h2 id="ov-h">One platform <em>under every app</em></h2>
+        <p>Apps stay small because meaning, governance and data access live below them, built once in SIP and shared by every app and every agent. Tap any item to jump to its stage.</p>
+      </div>
+    </div>
+    <div class="layers" id="layers">
+      <div class="lyr exp" data-l="exp"><div class="nm"><b>Experiences</b><span>how people and agents meet it</span></div><div class="cs"><button data-tip="The app's own UI, built for how the team works. Any customisation is possible." data-go="3">App screens</button><button data-tip="Reports and dashboards built on the shared semantic definitions, embeddable in any app." data-go="6">Reports &amp; dashboards</button><button data-tip="Ask a question in words; SIP turns it into a governed query." data-go="7">Plain language</button><button data-tip="The chat assistant inside each app. Every question goes to SIP over MCP." data-go="3">Assistant</button><button data-tip="AI clients such as Claude connect to SIP over MCP. They ask governed questions, and can also administer SIP: create an application, connect a source, model and govern it." data-go="5">Agents over MCP</button></div></div>
+      <div class="lyr app" data-l="app"><div class="nm"><b>Apps &amp; processes</b><span>what the business runs</span></div><div class="cs"><button data-tip="Each app registers its MCP endpoint; its read and action tools become available to SIP." data-go="5">Registered apps (MCP servers)</button><button data-tip="Read from one app, act in another, notify a channel. Built by drag and drop." data-go="9">Workflows across apps</button><button data-tip="Something happens in an app, such as an opportunity being created, and a bound workflow starts." data-go="9">Events</button><button data-tip="Policies can require approval; each workflow step reports back when it completes." data-go="9">Approvals &amp; callbacks</button></div></div>
+      <div class="lyr plat" data-l="plat"><div class="nm"><b>The platform · SIP</b><span>built once, inherited by every app</span></div><div class="cs"><button data-tip="Attributes, metrics and facts, surfaced from each app's schema and accepted by a person." data-go="6">Semantic layer</button><button data-tip="The ontology of business concepts that guides the AI to the right attributes and metrics." data-go="7">Knowledge graph</button><button data-tip="Defined once, applied in every app: allow, deny or require approval." data-go="8">Policies &amp; roles</button><button data-tip="Single sign-on identity, row filters inside the role, and field-level rules such as PII." data-go="8">Identity → rows → fields</button><button data-tip="Events, alerts, audit logs, usage, AI cost and service health in one place." data-go="10">Audit (Sentinel)</button></div></div>
+      <div class="lyr dat" data-l="dat"><div class="nm"><b>Data, in place</b><span>read where it lives</span></div><div class="cs"><button data-tip="Each app's own database, linked to the app in SIP as a data source." data-go="centre">App databases</button><button data-tip="Reads data where it lives, with no ETL into a warehouse." data-go="centre">Federated query engine</button><button data-tip="Data SIP imports is stored in Iceberg on the file system: a warehouse built on demand." data-go="centre">Iceberg store</button><button data-tip="Connectors include Iceberg, Delta Lake, Fabric, Hive and S3." data-go="5">Lakehouses</button><button data-tip="Unstructured content added as a document source, alongside the databases." data-go="5">Documents</button></div></div>
+    </div>
+  </section>
+
+  <main class="spine" id="spine">
+    <div class="fill" id="fill"></div>
+
+    <div class="phase">Set up</div>
+    <!-- 0 WORKSPACE -->
+    <article class="stage" data-n="0" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Create a workspace</h2>
+        <span class="hr"><span class="where">Governance › Workspaces</span><span class="who">SE · Admin</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">The container that hosts applications so they can act together.</span>
+      </button>
+      <div class="body" hidden>
+        <ul>
+          <li>Everything that follows happens inside a workspace: App Builder, app onboarding, surfacing, governance, workflows.</li>
+          <li>Apps in one workspace share roles, policies, semantic definitions and the ontology. That is what lets application two inherit what application one defined.</li>
+          <li>Create a workspace and invite your team. A company can run several workspaces, each with its own apps.</li>
+        </ul>
+        <div class="fig">
+          <div class="ttl">SIP Studio, the sections you will walk through</div>
+          <div class="studio" data-tabs>
+            <nav role="tablist" aria-label="SIP Studio sections">
+              <span class="lbl">Workspace</span>
+              <button role="tab" aria-selected="true" data-t="apps">Applications</button>
+              <button role="tab" aria-selected="false" data-t="builder">App Builder</button>
+              <button role="tab" aria-selected="false" data-t="sem">Semantic model</button>
+              <button role="tab" aria-selected="false" data-t="kg">Knowledge</button>
+              <button role="tab" aria-selected="false" data-t="wf">Workflows</button>
+              <button role="tab" aria-selected="false" data-t="gov">Governance</button>
+              <button role="tab" aria-selected="false" data-t="sen">Sentinel</button>
+            </nav>
+            <div class="sp" data-p="apps"><h4>Applications</h4><p>Every application in the workspace, and the place to onboard a new one. Each app has Overview, Sources, Context, Surface, Semantics, Governance and MCP Server tabs.</p><p>Apps run in production or in development side by side, for example a sales app and a service app in production, and a new CRM being built to replace a Salesforce org.</p><p class="note">Stage 5</p></div>
+            <div class="sp" data-p="builder" hidden><h4>App Builder</h4><p>The developer zone. An application build goes through Prepare, Discover, Choose modules, Compare and data migration, then Refine, Environments, Promote and Code review.</p><p class="note">Stage 2</p></div>
+            <div class="sp" data-p="sem" hidden><h4>Semantic model</h4><p>Attributes, metrics and facts committed from surfacing, with Objects, Tables and Hierarchy views, plus Readiness.</p><p class="note">Stage 6</p></div>
+            <div class="sp" data-p="kg" hidden><h4>Knowledge</h4><p>Ontology classes, relation types, entities, and the semantic objects they connect to.</p><p class="note">Stage 7</p></div>
+            <div class="sp" data-p="wf" hidden><h4>Workflows</h4><p>Drag-and-drop agentic workflows built from every app's MCP tools plus platform steps.</p><p class="note">Stage 9</p></div>
+            <div class="sp" data-p="gov" hidden><h4>Governance</h4><p>Users, roles and policies that apply across all apps; workspaces and SSO.</p><p class="note">Stage 8</p></div>
+            <div class="sp" data-p="sen" hidden><h4>Sentinel</h4><p>Observability: events, alerts, audit, usage, cost and service health.</p><p class="note">Stage 10</p></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 1 PREREQS -->
+    <article class="stage" data-n="1" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Prerequisites</h2>
+        <span class="hr"><span class="who">Platform admin</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Source-system connection and a Git repository, in place before App Builder runs.</span>
+      </button>
+      <div class="body" hidden>
+        <ul>
+          <li><b>Source connection:</b> credentials for the system being replaced (Salesforce, Workday…) are deployed securely by an administrator as environment variables. Once deployed, that system appears as a choice in App Builder and Discover already knows how to connect.</li>
+          <li><b>Git repository:</b> where the generated code lives. App Builder reads and writes it, and changes arrive as pull requests.</li>
+        </ul>
+      </div>
+    </article>
+
+    <div class="phase">Build the app</div>
+    <!-- 2 APP BUILDER -->
+    <article class="stage" data-n="2" data-owner="code">
+      <button class="head" aria-expanded="false">
+        <h2>Build the app in App Builder</h2>
+        <span class="hr"><span class="where">App Builder</span><span class="who">SE · FDE</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Guided steps read the old system's metadata and generate a new application as code.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="key"><b>Where to start: edge systems first.</b> Low risk, high business impact, e.g. Salesforce, Workday, marketing, sales engagement and analytics. Shared and core systems follow later.</div>
+        <div class="fig">
+          <div class="ttl">What App Builder reads, and what it produces</div>
+          <div class="scroll">
+            <svg viewBox="0 0 900 170" role="img" aria-label="Old system metadata is introspected into an extraction report, which drives generated code in Git, promoted through environments.">
+              <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#FA660F"/></marker></defs>
+              <g font-family="Inter, Arial, sans-serif">
+                <rect x="10" y="20" width="190" height="130" rx="8" fill="#FFFFFF" stroke="#D2D2D2"/>
+                <text x="105" y="48" text-anchor="middle" font-weight="600" font-size="15" fill="#000000">Old system</text>
+                <text x="105" y="68" text-anchor="middle" font-size="12" fill="#717171">Salesforce, Workday…</text>
+                <text x="105" y="96" text-anchor="middle" font-size="12" fill="#484747">metadata · artifacts</text>
+                <text x="105" y="114" text-anchor="middle" font-size="12" fill="#484747">configuration · custom code</text>
+                <text x="105" y="132" text-anchor="middle" font-size="12" fill="#484747">modules in use</text>
+
+                <path d="M202 85 H252" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+                <text x="227" y="72" text-anchor="middle" font-size="11" fill="#B9470A">metadata</text>
+
+                <rect x="256" y="20" width="190" height="130" rx="8" fill="#FFF3EC" stroke="#FA660F"/>
+                <text x="351" y="48" text-anchor="middle" font-weight="600" font-size="15" fill="#000000">Extraction report</text>
+                <text x="351" y="68" text-anchor="middle" font-size="12" fill="#717171">the blueprint</text>
+                <text x="351" y="96" text-anchor="middle" font-size="12" fill="#484747">scan results</text>
+                <text x="351" y="114" text-anchor="middle" font-size="12" fill="#484747">every module found</text>
+                <text x="351" y="132" text-anchor="middle" font-size="12" fill="#484747">handed to the FDE</text>
+
+                <path d="M448 85 H498" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+                <text x="473" y="72" text-anchor="middle" font-size="11" fill="#B9470A">generate</text>
+
+                <rect x="502" y="20" width="190" height="130" rx="8" fill="#000000"/>
+                <text x="597" y="48" text-anchor="middle" font-weight="600" font-size="15" fill="#FFFFFF">Code in Git</text>
+                <text x="597" y="68" text-anchor="middle" font-size="12" fill="#A8A8A8">customer's repository</text>
+                <text x="597" y="96" text-anchor="middle" font-size="12" fill="#E4E4E4">selected modules</text>
+                <text x="597" y="114" text-anchor="middle" font-size="12" fill="#E4E4E4">platform integration</text>
+                <text x="597" y="132" text-anchor="middle" font-size="12" fill="#E4E4E4">pull requests</text>
+
+                <path d="M694 85 H744" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#a1)"/>
+                <text x="719" y="72" text-anchor="middle" font-size="11" fill="#B9470A">promote</text>
+
+                <rect x="748" y="20" width="142" height="130" rx="8" fill="#FFFFFF" stroke="#D2D2D2"/>
+                <text x="819" y="48" text-anchor="middle" font-weight="600" font-size="15" fill="#000000">Environments</text>
+                <text x="819" y="80" text-anchor="middle" font-size="12" fill="#484747">development</text>
+                <text x="819" y="100" text-anchor="middle" font-size="12" fill="#484747">+ environments</text>
+                <text x="819" y="120" text-anchor="middle" font-size="12" fill="#484747">you register</text>
+              </g>
+            </svg>
+          </div>
+          <div class="cap">Discover reads the structure of the old system.</div>
+        </div>
+
+        <div class="stepper" role="tablist" aria-label="App Builder steps">
+          <button class="step" role="tab" aria-selected="true" data-step="0"><span class="n">01</span><span class="t">Prepare</span></button>
+          <button class="step" role="tab" aria-selected="false" data-step="1"><span class="n">02</span><span class="t">Discover</span></button>
+          <button class="step" role="tab" aria-selected="false" data-step="2"><span class="n">03</span><span class="t">Modules</span></button>
+          <button class="step" role="tab" aria-selected="false" data-step="3"><span class="n">04</span><span class="t">Compare</span></button>
+          <button class="step" role="tab" aria-selected="false" data-step="4"><span class="n">05</span><span class="t">Migrate data</span></button>
+        </div>
+        <div class="steppanel" id="steppanel" role="tabpanel" aria-live="polite"></div>
+        <div class="sub">After the first version</div>
+        <div class="trio">
+          <div><b>Refine</b>Describe a change in plain language, review the proposed code change, open a pull request. Browse and edit any file in the repo.</div>
+          <div><b>Environments · Promote</b>Register environments. Promote builds the code in Git, Verify runs the AI-generated tests and lets you fix issues, then deploy. Each deployment is listed and can be rolled back.</div>
+          <div><b>Code review</b>An independent reviewer agent, separate from the one that wrote the code, lists findings. Send them to Refine and repeat review and fix as often as needed.</div>
+        </div>
+              </div>
+    </article>
+
+    <!-- 3 OUTPUT -->
+    <article class="stage" data-n="3" data-owner="code">
+      <button class="head" aria-expanded="false">
+        <h2>The output: customer-owned code</h2>
+        <span class="hr"><span class="who">Customer</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">An application in the customer's Git repo, with its own database and its own MCP server.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="key">AI builds the app, and SIP acts as a lightweight IDE that puts the code in a Git repository. The code base is given to the customer: it is theirs. The app and SIP stay separate and connect over MCP.</div>
+        <div class="fig">
+          <div class="ttl">Inside the generated app</div>
+          <div class="anat">
+            <div><b>Modules</b>Whatever was turned on in Choose modules: accounts, contacts, opportunities and so on. Any customisation can be added, for example DSIs, AI case summaries and AI-drafted replies with a chosen tone.</div>
+            <div><b>MCP server</b>Read tools and action tools, for example get a case, list DSIs, get an opportunity (read); create a task, create a quote draft (action). SIP connects to it once deployed.</div>
+            <div class="wide"><b>Platform integration (always included)</b>Single sign-on · token minting (what this user may do) · MCP client for the in-app assistant · consistent message rendering · automated tests</div>
+            <div class="db"><b>Its own database</b>Generated when the application is created. Data from the old system is migrated into it (PostgreSQL).</div>
+            <div><b>Questions go to SIP</b>Every question typed in the app's assistant is an MCP call to SIP. The customer could repoint it later; it is still MCP.</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 DATA -->
+    <article class="stage" data-n="4" data-owner="data">
+      <button class="head" aria-expanded="false">
+        <h2>Move the data</h2>
+        <span class="hr"><span class="who">FDE</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Records move from the old system into the new app's database, then both run side by side.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="fig">
+          <div class="ttl">Migration and parallel run</div>
+          <div class="scroll">
+            <svg viewBox="0 0 900 200" role="img" aria-label="Data migrates from the old system into the new app database; both run in parallel and stay in sync until cut-over. About two weeks to a working app, about six months to full replacement.">
+              <defs>
+                <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#484747"/></marker>
+              </defs>
+              <g font-family="Inter, Arial, sans-serif">
+                <rect x="20" y="20" width="230" height="86" rx="8" fill="#FFFFFF" stroke="#D2D2D2"/>
+                <text x="135" y="56" text-anchor="middle" font-weight="600" font-size="15" fill="#000000">Old system</text>
+                <text x="135" y="78" text-anchor="middle" font-size="12" fill="#717171">still in production</text>
+
+                <rect x="650" y="20" width="230" height="86" rx="8" fill="#F7F0EB" stroke="#D1B4A3"/>
+                <text x="765" y="56" text-anchor="middle" font-weight="600" font-size="15" fill="#000000">New app database</text>
+                <text x="765" y="78" text-anchor="middle" font-size="12" fill="#717171">generated with the app</text>
+
+                <path d="M254 48 H646" stroke="#484747" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+                <text x="450" y="40" text-anchor="middle" font-size="12" fill="#484747">migrate (FDE)</text>
+                <path class="flow" d="M254 80 H646" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#a2)" marker-start="url(#a2)"/>
+                <text x="450" y="100" text-anchor="middle" font-size="12" fill="#B9470A">keep in sync during the parallel run</text>
+
+                <line x1="20" y1="150" x2="880" y2="150" stroke="#D2D2D2" stroke-width="2"/>
+                <rect x="20" y="144" width="150" height="12" rx="6" fill="#FA660F"/>
+                <circle cx="880" cy="150" r="7" fill="#000000"/>
+                <text x="20" y="180" font-size="12.5" font-weight="600" fill="#000000">~2 weeks: working app (POC)</text>
+                <text x="880" y="180" text-anchor="end" font-size="12.5" font-weight="600" fill="#000000">~6 months: full replacement</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <ul>
+          <li>App Builder includes a data migration step: point it at the old system and the new database, and for templates such as Salesforce and Workday it knows both data models and migrates the data. Forward-deployed engineers guide the process.</li>
+          <li>With the Empty template, the customer or FDE builds the migration for their source system.</li>
+          <li>Both systems then run in parallel and are kept in sync until cut-over. This is where most of the effort goes.</li>
+        </ul>
+      </div>
+    </article>
+
+    <div class="phase">Connect to SIP</div>
+    <!-- CENTREPIECE -->
+    <section class="centre" id="centre" aria-labelledby="c-h">
+      <h2 id="c-h">One database, <em>used two ways</em></h2>
+      <p>The app reads and writes its own database for day-to-day work. SIP connects to that same database as one of the app's data sources and reads it in place through federated query, with no ETL. Questions from the app reach SIP over MCP, and SIP's workflows act through the app's MCP action tools.</p>
+      <p>When it helps, SIP can also import data into its own Iceberg store on the file system. That is the idea of an intelligent warehouse: built from what users actually ask for, rather than an ETL designed in advance.</p>
+      <p>The app's dashboards and numbers also come from SIP, with the user's security applied: each person sees only the pipeline they're allowed to see, and an administrator sees all of it.</p>
+      <div class="scroll">
+        <svg viewBox="0 0 760 340" role="img" aria-label="The app reads and writes its own database. SIP reads the same database in place through federated query, and can optionally import data into an Iceberg store. Questions and workflow actions between SIP and the app go through MCP.">
+          <defs>
+            <marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#000000"/></marker>
+            <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#FA660F"/></marker>
+            <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#717171"/></marker>
+          </defs>
+          <g font-family="Inter, Arial, sans-serif">
+            <path class="flow" d="M644 68 V36 H116 V66" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#ao)"/>
+            <text x="380" y="26" text-anchor="middle" font-size="11.5" fill="#B9470A">questions and workflow actions go through MCP</text>
+
+            <g class="blk" data-tip="Customer-owned code in Git, with an MCP server (read and action tools) and an MCP client for the in-app assistant.">
+              <rect x="16" y="70" width="200" height="130" rx="8" fill="#000000"/>
+              <text x="116" y="104" text-anchor="middle" font-weight="600" font-size="17" fill="#FFFFFF">Strategy App</text>
+              <text x="116" y="126" text-anchor="middle" font-size="12.5" fill="#A8A8A8">UI · business logic</text>
+              <rect x="46" y="144" width="140" height="38" rx="6" fill="#FFFFFF"/>
+              <text x="116" y="168" text-anchor="middle" font-size="12.5" font-weight="500" fill="#000000">MCP server</text>
+            </g>
+            <g class="blk" data-tip="The app's own database, generated with the app and linked to it in SIP as a data source.">
+              <ellipse cx="380" cy="92" rx="78" ry="16" fill="#F7F0EB" stroke="#D1B4A3" stroke-width="1.5"/>
+              <path d="M302 92v100c0 9 35 16 78 16s78-7 78-16V92" fill="#F7F0EB" stroke="#D1B4A3" stroke-width="1.5"/>
+              <path d="M302 92c0 9 35 16 78 16s78-7 78-16" fill="none" stroke="#D1B4A3" stroke-width="1.5"/>
+              <text x="380" y="152" text-anchor="middle" font-weight="600" font-size="16" fill="#000000">App database</text>
+              <text x="380" y="172" text-anchor="middle" font-size="12" fill="#717171">accounts · cases · …</text>
+            </g>
+            <g class="blk" data-tip="SIP: semantic layer, ontology, governance, workflows and Sentinel, defined on top of the app's tables.">
+              <rect x="544" y="70" width="200" height="130" rx="8" fill="#FA660F"/>
+              <text x="644" y="104" text-anchor="middle" font-weight="600" font-size="17" fill="#FFFFFF">SIP</text>
+              <text x="644" y="126" text-anchor="middle" font-size="12.5" fill="#FFFFFF">semantic layer · ontology</text>
+              <text x="644" y="144" text-anchor="middle" font-size="12.5" fill="#FFFFFF">governance · workflows</text>
+              <text x="644" y="162" text-anchor="middle" font-size="12.5" fill="#FFFFFF">Sentinel</text>
+            </g>
+            <g class="blk" data-tip="Optional. Data SIP imports is stored in Iceberg on the file system, not held in memory; memory is used only to execute queries.">
+              <rect x="424" y="256" width="196" height="64" rx="8" fill="#FFFFFF" stroke="#FA660F" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <text x="522" y="283" text-anchor="middle" font-weight="600" font-size="14.5" fill="#000000">Iceberg store</text>
+              <text x="522" y="302" text-anchor="middle" font-size="12" fill="#717171">imported data · file system</text>
+            </g>
+
+            <path class="flow" d="M218 124 H298" stroke="#000000" stroke-width="2" fill="none" marker-end="url(#ak)" marker-start="url(#ak)"/>
+            <text x="258" y="114" text-anchor="middle" font-size="11" fill="#000000">read · write</text>
+            <path class="flow" d="M542 124 H462" stroke="#FA660F" stroke-width="2" fill="none" marker-end="url(#ao)"/>
+            <text x="502" y="114" text-anchor="middle" font-size="11" fill="#B9470A">reads in place</text>
+            <text x="502" y="140" text-anchor="middle" font-size="10.5" fill="#717171">federated · no ETL</text>
+
+            <path d="M380 212 V288 H420" stroke="#717171" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#ag)"/>
+            <text x="372" y="252" text-anchor="end" font-size="11" fill="#717171">import (optional)</text>
+            <path d="M622 288 H662 V204" stroke="#FA660F" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#ao)"/>
+            <text x="670" y="252" font-size="11" fill="#B9470A">reads</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 5 REGISTER -->
+    <article class="stage" data-n="5" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Register the app in SIP</h2>
+        <span class="hr"><span class="where">Applications</span><span class="who">SE · Admin</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Onboard the app, link its data sources, add context and register its MCP endpoint.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="trio">
+          <div><b>From App Builder</b>Replaces a SaaS system; the code lands in the customer's Git repository (stages 2–4).</div>
+          <div><b>An existing app</b>Already running, with its own database: onboard it and connect its data source.</div>
+          <div><b>A custom app</b>Built with any AI using the integration prompts, on its own database.</div>
+        </div>
+        <p class="note" style="margin:-6px 0 0">However it was built, the app registers the same way: sources, context, surface, MCP endpoint.</p>
+        <p style="margin:0;max-width:76ch">The application is the main actor in SIP. Everything else (sources, the semantic model, roles) hangs off it. Click the tabs: this is what each one does on an application's page.</p>
+        <div class="ui" data-tabs>
+          <div class="uibar"><i></i><i></i><i></i><span>Applications › Strategy Sales</span></div>
+          <div class="tl" role="tablist" aria-label="Application tabs">
+            <button role="tab" aria-selected="true" data-t="ov">Overview</button>
+            <button role="tab" aria-selected="false" data-t="src">Sources</button>
+            <button role="tab" aria-selected="false" data-t="ctx">Context</button>
+            <button role="tab" aria-selected="false" data-t="srf">Surface</button>
+            <button role="tab" aria-selected="false" data-t="sem">Semantics</button>
+            <button role="tab" aria-selected="false" data-t="gov">Governance</button>
+            <button role="tab" aria-selected="false" data-t="mcp">MCP Server</button>
+          </div>
+          <div class="tp" data-p="ov"><h4>Overview</h4><p>Name and description of the application.</p></div>
+          <div class="tp" data-p="src" hidden><h4>Sources</h4><p>The data sources linked to this app. An app can have several, for example its own PostgreSQL database plus a collection of documents.</p><p> Three kinds: <span class="tag">databases</span><span class="tag">plugins</span><span class="tag">document corpus</span>. Plugins can be written to reach any source.</p><p>Broad connector list, including lakehouses: Iceberg, Delta Lake, Fabric, Hive, S3.</p></div>
+          <div class="tp" data-p="ctx" hidden><h4>Context</h4><p>Upload PDFs and other supported documents about the application. The AI uses them as context during surfacing.</p></div>
+          <div class="tp" data-p="srf" hidden><h4>Surface</h4><p>Pick a data source, scope its tables, write the surfacing context, then run surface. Review the proposals and accept them. Every acceptance is recorded in the acceptance log. Run once per data source.</p><p class="note">Detail in stage 6.</p></div>
+          <div class="tp" data-p="sem" hidden><h4>Semantics</h4><p>Summary of everything committed to the model for this app: metrics, facts, attributes, domain concepts, relations, ontology classes, and the roles, policies and hierarchies surfacing created.</p></div>
+          <div class="tp" data-p="gov" hidden><h4>Governance</h4><p>The members who can access this application and their access rights.</p></div>
+          <div class="tp" data-p="mcp" hidden><h4>MCP Server</h4><p>Register the app's MCP endpoint. SIP discovers the tools it advertises and classifies each as <span class="tag o">read</span> or <span class="tag o">action</span>. Those tools then appear in Workflows.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 6 SURFACE -->
+    <article class="stage" data-n="6" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Surface the semantic model</h2>
+        <span class="hr"><span class="where">Surface · Semantic model</span><span class="who">SIP AI · reviewer</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">AI reads the schema and proposes the model. A person reviews and accepts.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="fig">
+          <div class="ttl">The surface pipeline</div>
+          <div class="sub" style="margin:0">Inputs</div>
+          <div class="inputs">
+            <span class="tag">Tables in scope (e.g. 138 in the service desk)</span>
+            <span class="tag">Context documents</span>
+            <span class="tag">Purpose and domain</span>
+            <span class="tag">Personas and their decisions</span>
+            <span class="tag">Typical questions</span>
+            <span class="tag">KPIs already tracked</span>
+            <span class="tag">Who sees what</span>
+            <span class="tag">Special handling</span>
+          </div>
+          <div class="pipe" aria-label="Pipeline">
+            <span>Read schema</span><i>→</i>
+            <span>Logical tables</span><i>→</i>
+            <span>Attributes &amp; facts</span><i>→</i>
+            <span>Metrics</span><i>→</i>
+            <span class="o">Proposals</span><i>→</i>
+            <span class="k">Accept</span><i>→</i>
+            <span class="o">Semantics</span>
+          </div>
+          <div class="sub" style="margin:0">Proposals include</div>
+          <div class="inputs">
+            <span class="tag o">metrics</span><span class="tag o">attributes</span><span class="tag o">knowledge entities</span><span class="tag o">ontology classes</span><span class="tag o">roles &amp; policies</span><span class="tag o">hierarchies</span>
+          </div>
+          <div class="cap">Similar to Mosaic's AI modelling: the first version of the model is generated for you, then refined by a person.</div>
+        </div>
+
+        <div class="fig">
+          <div class="ttl">How two databases are joined: attribute bindings</div>
+          <div class="scroll">
+            <svg viewBox="0 0 760 190" role="img" aria-label="The Account attribute is bound to the account ID column in both the CRM database and the service desk database, and links to the Account ontology class through its entity reference.">
+              <g font-family="Inter, Arial, sans-serif">
+                <rect x="290" y="12" width="180" height="40" rx="20" fill="#FFF3EC" stroke="#FA660F"/>
+                <text x="380" y="37" text-anchor="middle" font-size="13" font-weight="600" fill="#B9470A">Ontology class: Account</text>
+                <path d="M380 54 V78" stroke="#FA660F" stroke-width="2" stroke-dasharray="4 4"/>
+                <text x="392" y="70" font-size="11" fill="#B9470A">entity reference</text>
+                <rect x="300" y="80" width="160" height="42" rx="8" fill="#000000"/>
+                <text x="380" y="106" text-anchor="middle" font-size="14" font-weight="600" fill="#FFFFFF">Attribute: Account</text>
+                <path d="M300 112 L170 150" stroke="#484747" stroke-width="2"/>
+                <path d="M460 112 L590 150" stroke="#484747" stroke-width="2"/>
+                <text x="220" y="124" font-size="11" fill="#484747">binding</text>
+                <text x="510" y="124" font-size="11" fill="#484747">binding</text>
+                <rect x="60" y="146" width="220" height="36" rx="8" fill="#F7F0EB" stroke="#D1B4A3"/>
+                <text x="170" y="169" text-anchor="middle" font-size="12.5" fill="#000000">CRM database · account ID</text>
+                <rect x="480" y="146" width="220" height="36" rx="8" fill="#F7F0EB" stroke="#D1B4A3"/>
+                <text x="590" y="169" text-anchor="middle" font-size="12.5" fill="#000000">Service desk database · account ID</text>
+              </g>
+            </svg>
+          </div>
+          <div class="cap">The attribute is the glue between sources, the same way as in Strategy today: add a column binding for each source. The ontology then builds on top of the attributes.</div>
+        </div>
+        <div class="key">SIP's semantic layer is separate from a Strategy Mosaic model: one serves applications, the other BI. A sync tool can mirror a Mosaic model into SIP.</div>
+
+        <div class="ui" data-tabs>
+          <div class="uibar"><i></i><i></i><i></i><span>Semantic model</span></div>
+          <div class="tl" role="tablist" aria-label="Semantic model views">
+            <button role="tab" aria-selected="true" data-t="obj">Objects</button>
+            <button role="tab" aria-selected="false" data-t="tab">Tables</button>
+            <button role="tab" aria-selected="false" data-t="hie">Hierarchy</button>
+            <button role="tab" aria-selected="false" data-t="rdy">Readiness</button>
+          </div>
+          <div class="tp" data-p="obj"><h4>Objects</h4><p>Every attribute, metric and fact, viewable by type, by data source or by application. An attribute has forms, relationships, display options, governance options (such as a scope for the caller), synonyms and an entity reference to the ontology. An application-level filter is coming.</p></div>
+          <div class="tp" data-p="tab" hidden><h4>Tables</h4><p>The same tables view as in Strategy: how each attribute connects across tables, filterable by data source.</p></div>
+          <div class="tp" data-p="hie" hidden><h4>Hierarchy</h4><p>The same hierarchy view as in Strategy: pick an attribute and see how it relates to everything else.</p></div>
+          <div class="tp" data-p="rdy" hidden><h4>Readiness</h4><p>Reviews the semantic layer so natural-language questions are answered well, with a recommendation for each finding that you can apply in place. It checks entity bindings, tables, relationships between attributes, and row filters on roles.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 7 ONTOLOGY -->
+    <article class="stage" data-n="7" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Ontology and knowledge graph</h2>
+        <span class="hr"><span class="where">Knowledge</span><span class="who">SIP</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">A graph of business concepts that helps the AI pick the right attributes and metrics for every question.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="key">The ontology serves questions on data: it helps the AI understand what the user is asking about.</div>
+
+        <div class="fig">
+          <div class="ttl">The layers, top to bottom</div>
+          <div class="stack">
+            <div class="layer l1"><b>Ontology</b><span>Classes (Account, Support Case, SLA Agreement) and relation types (a support case belongs to an account). The concept graph.</span></div>
+            <div class="link">↓ entity reference ties each semantic object to a class</div>
+            <div class="layer l2"><b>Semantic layer</b><span>Attributes, metrics and facts, used to write the semantic query.</span></div>
+            <div class="link">↓ attribute bindings</div>
+            <div class="layer l4"><b>Data sources</b><span>The app databases, read in place.</span></div>
+          </div>
+          <div class="cap">Analogy raised in the session, and broadly agreed: the ontology plays the role that application objects played in Strategy, and the semantic layer plays the role of schema objects.</div>
+        </div>
+
+        <div class="fig">
+          <div class="ttl">How a question travels</div>
+          <div class="pipe">
+            <span>Question</span><i>→</i><span>Intent</span><i>→</i><span>Concepts</span><i>→</i><span class="o">Walk the graph</span><i>→</i><span>Dynamic context</span><i>→</i><span class="k">Attributes · metrics · filters</span><i>→</i><span>Check the policy</span><i>→</i><span>Generate the SQL</span><i>→</i><span class="o">Answer + SQL + tables used</span>
+          </div>
+          <div class="key" style="margin:0">Same question, same SQL, same number. The AI interprets the words; the definition, the policy and the SQL come from the platform, so every app, report and agent gets the same answer, and you can read the SQL behind it.</div>
+          <div class="cap">Picking the right attributes, metrics and filters is all the AI has to do; together they are like a report template. Without the graph the AI relies on descriptions alone; walking the graph gives it the relationships too, so it picks the right objects far more reliably.</div>
+          <div class="scroll">
+            <svg viewBox="0 0 820 200" role="img" aria-label="Example graph: Account relates to Support Case, which relates to Escalation; an SLA instance relates to the Support Case and the SLA Agreement. The escalations question walks Account to Support Case to Escalation.">
+              <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#A8A8A8"/></marker>
+              <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#FA660F"/></marker></defs>
+              <g font-family="Inter, Arial, sans-serif">
+                <text x="16" y="22" font-size="12.5" font-weight="600" fill="#000000">"In account X, how many escalations have we seen in the last two years?"</text>
+                <rect x="20" y="70" width="140" height="44" rx="22" fill="#FA660F"/><text x="90" y="97" text-anchor="middle" font-size="13.5" font-weight="600" fill="#FFFFFF">Account</text>
+                <rect x="250" y="70" width="160" height="44" rx="22" fill="#FA660F"/><text x="330" y="97" text-anchor="middle" font-size="13.5" font-weight="600" fill="#FFFFFF">Support Case</text>
+                <rect x="500" y="40" width="150" height="44" rx="22" fill="#FA660F"/><text x="575" y="67" text-anchor="middle" font-size="13.5" font-weight="600" fill="#FFFFFF">Escalation</text>
+                <rect x="500" y="130" width="150" height="44" rx="22" fill="#FFFFFF" stroke="#A8A8A8"/><text x="575" y="157" text-anchor="middle" font-size="13.5" fill="#484747">SLA instance</text>
+                <rect x="690" y="130" width="120" height="44" rx="22" fill="#FFFFFF" stroke="#A8A8A8"/><text x="750" y="157" text-anchor="middle" font-size="13" fill="#484747">SLA Agreement</text>
+                <path class="flow" d="M162 92 H246" stroke="#FA660F" stroke-width="2.5" fill="none" marker-end="url(#a4)"/>
+                <path class="flow" d="M412 84 L496 66" stroke="#FA660F" stroke-width="2.5" fill="none" marker-end="url(#a4)"/>
+                <path d="M412 102 L496 146" stroke="#A8A8A8" stroke-width="1.5" fill="none" marker-end="url(#a3)"/>
+                <path d="M652 152 H686" stroke="#A8A8A8" stroke-width="1.5" fill="none" marker-end="url(#a3)"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ui" data-tabs>
+          <div class="uibar"><i></i><i></i><i></i><span>Knowledge</span></div>
+          <div class="tl" role="tablist" aria-label="Knowledge views">
+            <button role="tab" aria-selected="true" data-t="cls">Classes</button>
+            <button role="tab" aria-selected="false" data-t="rel">Relation types</button>
+            <button role="tab" aria-selected="false" data-t="ent">Entities</button>
+            <button role="tab" aria-selected="false" data-t="sobj">Semantic</button>
+            <button role="tab" aria-selected="false" data-t="why">Concepts, not data</button>
+          </div>
+          <div class="tp" data-p="cls"><h4>Classes</h4><p>A class defines a business concept, like a class in object-oriented programming: Account, Support Case, SLA Agreement. Hovering a class explains it. It is the same idea Mosaic calls ontologies: concepts, not data.</p><p>Classes can have a parent. For example, Account, Contact and Lead are types of Party; Opportunity, Quote, Order and Support Case are commercial records. Each proposed class belongs to the application it was surfaced from.</p></div>
+          <div class="tp" data-p="rel" hidden><h4>Relation types</h4><p>How two classes can be associated, starting from a source class. An account can be the child of another account; a customer places an order.</p></div>
+          <div class="tp" data-p="ent" hidden><h4>Entities</h4><p>Instances that take on a class's properties. Several entities can share one class, and relation types connect them.</p></div>
+          <div class="tp" data-p="sobj" hidden><h4>Semantic</h4><p>The semantic objects (forms, attributes, metrics, facts, entities) that the business concepts connect to. Surfacing creates these links, so the AI can move from a concept to the right attribute or metric. A test pane shows how any question routes across the graph, and readiness checks extend to the knowledge graph too.</p></div>
+          <div class="tp" data-p="why" hidden><h4>Why a graph of concepts</h4><p>SIP graphs business concepts rather than individual records. Each user sees data according to their own security, so one graph of concepts serves every user and every connection, and the data itself stays governed in the semantic layer.</p><p class="note">The ontology is designed to align with open standards such as Apache OSI, so semantic platforms and AI agents can share concepts.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <div class="phase">Run on the platform</div>
+    <!-- 8 GOVERN -->
+    <article class="stage" data-n="8" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Govern</h2>
+        <span class="hr"><span class="where">Governance</span><span class="who">SIP</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Roles and policies defined once, enforced in every application on the platform.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="fig">
+          <div class="ttl">Four checks before anything runs</div>
+          <div class="checks">
+            <div><b>Identity</b>Single sign-on. Apps and agents act as the named person.</div>
+            <div><b>Object</b>Roles grant read and write per type of object.</div>
+            <div><b>Rows</b>Row filters become part of the SQL, so totals cover exactly the rows the user may see.</div>
+            <div><b>Fields</b>Personal data is masked, or routed for approval.</div>
+          </div>
+          <div class="cap">The same four checks apply to people, apps and agents, wherever the request comes from.</div>
+        </div>
+        <div class="fig">
+          <div class="ttl">One policy, every app</div>
+          <div class="fan">
+            <div class="pol"><b>Policy · PII</b>Attributes tagged PII are visible to support managers and platform admins.</div>
+            <div class="arrow" aria-hidden="true">→</div>
+            <div class="apps">
+              <div>Strategy Sales (CRM) <em>applied</em></div>
+              <div>Strategy Service <em>applied</em></div>
+              <div>Next app onboarded <em>applied</em></div>
+            </div>
+          </div>
+          <div class="cap">Example policy. The policy screen previews which objects a new rule affects before you save it.</div>
+        </div>
+        <ul>
+          <li><b>Roles:</b> permissions such as read and write on metrics, entities and policies, and row-level security inside the role. Row filters can be an attribute condition, a manager or team scope, or a value from the user's SSO token such as region or tenant. Reads on an entity can also be delegated to the application.</li>
+          <li><b>Policies:</b> allow, deny or require approval, based on the caller's role, a PII tag or any custom tag. Higher priority wins.</li>
+          <li><b>How it compares with Strategy:</b> everything is driven by roles, entity access is read and write, and security filters live on the role.</li>
+          <li><b>Strategy Access (optional):</b> the app keeps its own RBAC and publishes its permission sets; Strategy Access manages them centrally across apps, which keeps compliance simple. When enabled, an Access section manages users, groups, roles and permissions.</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 9 WORKFLOWS -->
+    <article class="stage" data-n="9" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Act with workflows</h2>
+        <span class="hr"><span class="where">Workflows</span><span class="who">SIP</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Agentic workflows that read from one app and act in another.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="fig">
+          <div class="ttl">Example process: a new opportunity in sales opens an onboarding task in service</div>
+          <div class="wf">
+            <div class="node"><small>1 · Event · sales app</small>Opportunity created</div><i>→</i>
+            <div class="node"><small>2 · Trigger</small>The bound workflow starts</div><i>→</i>
+            <div class="node rd"><small>3 · Read · sales app</small>Read the opportunity, as the caller</div><i>→</i>
+            <div class="node ac"><small>4 · Action · service app</small>Create task "Qualify new opportunity"</div><i>→</i>
+            <div class="node nt"><small>5 · Notify</small>Post to a Teams channel</div><i>→</i>
+            <div class="node"><small>6 · Callback</small>Complete, or compensate</div>
+          </div>
+          <div class="cap">Processes cross apps as events and actions, with no integration code in between. The read step's output (opportunity name, stage, close date, region) fills the action's parameters, and an idempotency key makes sure the task is created once. If a step is rejected, the earlier steps are compensated.</div>
+        </div>
+        <ul>
+          <li><b>Building blocks:</b> every registered app's MCP tools, grouped by application, plus metric query, call to another LLM, LLM summary, knowledge-graph lookup, search and traverse, and notify.</li>
+          <li><b>Notify channels:</b> email, Microsoft Teams and Slack, once a channel is registered.</li>
+          <li>Drag and drop steps and connect outputs to inputs. Sample workflows are deployed, but you can build any workflow.</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- 10 SENTINEL -->
+    <article class="stage" data-n="10" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Observe with Sentinel</h2>
+        <span class="hr"><span class="where">Sentinel</span><span class="who">SIP</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Everything that happens across the apps and the platform, in one place.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="tiles">
+          <div><b>Events &amp; alerts</b>Every event in the system, with alerts by severity.</div>
+          <div><b>Risks &amp; anomalies</b>Per data source.</div>
+          <div><b>Audit &amp; compliance</b>GDPR audit logs, exportable to Excel.</div>
+          <div><b>User insights</b>Queries and users per app and data model.</div>
+          <div><b>Usage</b>Semantic object usage and source usage.</div>
+          <div><b>Cost intelligence</b>LLM spend, tokens and model calls.</div>
+          <div><b>Service health</b>Authentication, each application, errors, pipelines.</div>
+          <div><b>Operational reports</b>Governance and compliance, activity, reliability, orchestration.</div>
+        </div>
+      </div>
+    </article>
+    <div class="phase">Grow</div>
+    <!-- 11 NEXT APP -->
+    <article class="stage" data-n="11" data-owner="platform">
+      <button class="head" aria-expanded="false">
+        <h2>Add the next app</h2>
+        <span class="hr"><span class="where">Same workspace</span><span class="who">SIP</span><svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <span class="sum">Each new app starts with the business already modelled, governed and connected.</span>
+      </button>
+      <div class="body" hidden>
+        <div class="key">Business concepts are defined once in the knowledge graph. Each app maps its own data to the same Account, Product, Case and User, so application two inherits what application one defined.</div>
+        <div class="fig">
+          <div class="ttl">One ontology, reused by every app</div>
+          <div class="scroll">
+            <table class="matrix">
+              <thead><tr><th scope="col">Shared concept</th><th scope="col">Sales app</th><th scope="col">Service app</th><th scope="col">Orders app</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Account</th><td>Owns the relationship, pipeline and ARR</td><td>Reads tier and entitlement to set SLA targets</td><td>Sees which customers a late order affects</td></tr>
+                <tr><th scope="row">Product · line item</th><td>Quotes it, with price books and bundles</td><td>&ndash;</td><td>Ships it as order lines</td></tr>
+                <tr><th scope="row">Support case</th><td>Shows open cases on the account</td><td>Owns the lifecycle: SLA, escalation, notes</td><td>&ndash;</td></tr>
+                <tr><th scope="row">User · org hierarchy</th><td>Rep and manager hierarchy</td><td>Assignment groups and queues</td><td>Operations team</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="cap">The orders app is illustrative.</div>
+        </div>
+        <ul>
+          <li><b>Inherited on day one:</b> the shared ontology, roles and policies, the MCP door for questions and actions, workflows and Sentinel. The new app's own data is surfaced into the same model.</li>
+          <li><b>Joined, not integrated:</b> shared attributes bind each new database to the same concepts, and workflows can span every app in the workspace.</li>
+          <li><b>Compounding value:</b> every app added makes the shared model richer for the next one.</li>
+        </ul>
+      </div>
+    </article>
+  </main>
+
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function(){
+  const steps = [
+    {t:"Prepare", b:["Application details. Pick a template: <span class='tag'>Sales</span><span class='tag'>Service</span><span class='tag'>People</span><span class='tag'>Learning</span><span class='tag'>Empty</span>. The four templates are applications already built and tested internally.","Pick the source system to replace, such as Salesforce. The choices follow the template: a sales template offers the sales systems it can replace, a service template the service systems.","Tech stack: all templates are TypeScript Fastify + React. With Empty you can choose another stack, such as .NET, Python or Java.","Create the build plan."]},
+    {t:"Discover", b:["Introspect the system being replaced: click Extract and App Builder connects and analyses everything it can.","It reads the metadata and artifacts of the system.","Scan results list every module in use, with a choice to implement each one or not in this build.","The full extraction report is the blueprint you give to an FDE to implement."]},
+    {t:"Choose modules", b:["Turn modules on or off: accounts, contacts, opportunities and so on.","The platform integration module (template baseline) is always included: single sign-on, token minting, the MCP client (the in-app assistant), consistent message rendering, and tests.","With the Empty template, an internal prompt tells the AI how to implement it."]},
+    {t:"Compare", b:["A parity report: the scan of the old system against what exists in the Git repository.","Side by side: the modules you were supposed to build, the ones already built, and what each does."]},
+    {t:"Migrate data", b:["Give it the connection to the old system and to the new database the build created.","For templates such as Salesforce and Workday, both data models are known, so App Builder migrates the data.","With the Empty template, the customer or FDE builds the migration from the generated database model."]}
+  ];
+  const panel = document.getElementById('steppanel');
+  const stepBtns = [...document.querySelectorAll('.step')];
+  function showStep(i){
+    stepBtns.forEach((b,j)=>b.setAttribute('aria-selected', String(i===j)));
+    const s = steps[i];
+    panel.innerHTML = '<h4>'+s.t+'</h4><ul>'+s.b.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+    if (panel.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) [...panel.querySelectorAll('h4,li')].forEach((el,k)=>el.animate([{opacity:0,transform:'translateX(-8px)'},{opacity:1,transform:'none'}],{duration:300,delay:k*45,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'}));
+  }
+  stepBtns.forEach((b,i)=>b.addEventListener('click',e=>{e.stopPropagation();showStep(i)}));
+  showStep(0);
+
+  document.querySelectorAll('[data-tabs]').forEach(box=>{
+    const btns = box.querySelectorAll('[role="tab"]');
+    const panes = box.querySelectorAll('[data-p]');
+    btns.forEach(b=>b.addEventListener('click',()=>{
+      btns.forEach(x=>x.setAttribute('aria-selected', String(x===b)));
+      panes.forEach(p=>{ const show = p.dataset.p === b.dataset.t; const was = !p.hidden; p.hidden = !show; if(show && !was && p.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) p.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'}); });
+    }));
+  });
+
+  const stages = [...document.querySelectorAll('.stage')];
+  const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EASE = 'cubic-bezier(.2,.8,.2,1)';
+  function setOpen(st, open, anim=true){
+    const body = st.querySelector('.body');
+    if (st.classList.contains('open') === open && body.hidden === !open) return;
+    st.classList.toggle('open', open);
+    st.querySelector('.head').setAttribute('aria-expanded', String(open));
+    if (REDUCE || !anim || !body.animate){ body.hidden = !open; return; }
+    body.getAnimations().forEach(a=>a.cancel());
+    body.style.overflow='hidden';
+    if (open){
+      body.hidden = false;
+      const h = body.scrollHeight;
+      const a = body.animate([{height:'0px',opacity:0},{height:h+'px',opacity:1}],{duration:460,easing:EASE});
+      a.onfinish = ()=>{ body.style.overflow=''; };
+      [...body.children].forEach((c,i)=>c.animate([{transform:'translateY(10px)',opacity:0},{transform:'none',opacity:1}],{duration:420,delay:80+i*60,easing:EASE,fill:'backwards'}));
+    } else {
+      const h = body.offsetHeight;
+      const a = body.animate([{height:h+'px',opacity:1},{height:'0px',opacity:0}],{duration:320,easing:'cubic-bezier(.4,0,.2,1)'});
+      a.onfinish = ()=>{ if(!st.classList.contains('open')) body.hidden = true; body.style.overflow=''; };
+    }
+  }
+  function settle(st){
+    const r = st.getBoundingClientRect();
+    if (r.top < 110 || r.top > innerHeight*0.55) st.scrollIntoView({behavior: REDUCE?'auto':'smooth', block:'start'});
+  }
+  let current = 0;
+  function focusStage(i){
+    current = Math.max(0, Math.min(stages.length-1, i));
+    stages.forEach((s,j)=>s.classList.toggle('current', j===current));
+    stages[current].querySelector('.head').focus({preventScroll:true});
+    stages[current].scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto':'smooth', block:'start'});
+  }
+  stages.forEach((st,i)=>st.querySelector('.head').addEventListener('click',()=>{ const o=!st.classList.contains('open'); setOpen(st,o); current=i; if(o) setTimeout(()=>settle(st),120); }));
+  setOpen(stages[2], true, false);
+
+  const expandBtn = document.getElementById('expandAll');
+  expandBtn.addEventListener('click',()=>{
+    const allOpen = stages.every(s=>s.classList.contains('open'));
+    stages.forEach(s=>setOpen(s, !allOpen));
+    expandBtn.textContent = allOpen ? 'Expand all' : 'Collapse all';
+  });
+
+  document.addEventListener('keydown',e=>{
+    if (e.target.closest('input,textarea,[role="tab"]')) return;
+    if (e.key==='ArrowDown'){ e.preventDefault(); focusStage(current+1); }
+    else if (e.key==='ArrowUp'){ e.preventDefault(); focusStage(current-1); }
+  });
+
+
+  const tip = document.getElementById('tip');
+  function showTip(el){
+    tip.textContent = el.dataset.tip; tip.classList.add('on');
+    const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = r.left + r.width/2 - tw/2; x = Math.max(8, Math.min(innerWidth - tw - 8, x));
+    let y = r.top - th - 8; if (y < 70) y = r.bottom + 8;
+    tip.style.left = x+'px'; tip.style.top = y+'px';
+  }
+  function hideTip(){ tip.classList.remove('on'); }
+  document.querySelectorAll('[data-tip]').forEach(el=>{
+    el.addEventListener('mouseenter',()=>showTip(el));
+    el.addEventListener('mouseleave',hideTip);
+    el.addEventListener('click',e=>{ e.stopPropagation(); tip.classList.contains('on') ? hideTip() : showTip(el); });
+  });
+  addEventListener('scroll',hideTip,{passive:true});
+  document.addEventListener('click',hideTip);
+
+  function goTo(n){
+    if(n==='centre'){ document.getElementById('centre').scrollIntoView({block:'start'}); return; }
+    const st = stages.find(x=>x.dataset.n===String(n)); if(!st) return;
+    setOpen(st,true); current = stages.indexOf(st);
+    st.scrollIntoView({behavior:REDUCE?'auto':'smooth', block:'start'});
+    st.classList.remove('flash'); void st.offsetWidth; st.classList.add('flash');
+    setTimeout(()=>st.classList.remove('flash'),1600);
+  }
+  document.querySelectorAll('.lyr .cs button').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); hideTip(); goTo(b.dataset.go); }));
+
+
+  if('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('reveal'); io.unobserve(e.target);} }),{rootMargin:'0px 0px -8% 0px'});
+    [...stages, document.getElementById('centre')].forEach(el=>{ if(el.getBoundingClientRect().top>innerHeight) io.observe(el); });
+  }
+
+
+  // scrollspy: fills spine markers as you pass them
+  const order=[...document.querySelectorAll('#spine > .stage, #spine > .centre')];
+  function setActive(idx){
+    order.forEach((el,i)=>{ el.classList.toggle('passed', i<idx); el.classList.toggle('active', i===idx); });
+  }
+  let lastIdx=-1;
+  function spy(){
+    const line=innerHeight*0.55; let idx=0;
+    order.forEach((el,i)=>{ if(el.getBoundingClientRect().top<=line) idx=i; });
+    if(idx!==lastIdx){ lastIdx=idx; setActive(idx); }
+  }
+  addEventListener('scroll',spy,{passive:true}); addEventListener('resize',spy); spy();
+  const spine = document.getElementById('spine'), fill = document.getElementById('fill');
+  function progress(){
+    const r = spine.getBoundingClientRect();
+    fill.style.height = Math.max(0, Math.min(r.height - 16, innerHeight*0.55 - r.top)) + 'px';
+  }
+  addEventListener('scroll',progress,{passive:true}); addEventListener('resize',progress); progress();
+})();
+</script>
+</body>
+</html>
