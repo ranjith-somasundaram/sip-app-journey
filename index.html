@@ -19,8 +19,9 @@
   --r:8px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-padding-top:90px}
-body{background:var(--white);color:var(--black);font-family:var(--font);font-size:15.5px;line-height:1.55;margin:0;
+body{background:var(--white);color:var(--black);font-family:var(--font);font-size:15.5px;line-height:1.62;margin:0;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 56px}
 h1,h2,h3,h4{font-weight:600;letter-spacing:-.02em;text-wrap:balance;margin:0}
 button{font:inherit;color:inherit}
@@ -42,7 +43,7 @@ header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;backgrou
 .outline:hover{background:var(--orange);color:var(--white)}
 
 /* Hero */
-.hero{padding-block:44px 28px;display:grid;gap:14px}
+.hero{padding-block:64px 40px;display:grid;gap:18px}
 .hero h1{font-size:clamp(30px,5vw,56px);line-height:1.05;max-width:20ch}
 .hero h1 em{font-style:normal;color:var(--orange)}
 .hero p{margin:0;color:var(--g600);max-width:64ch;font-size:17px}
@@ -52,19 +53,19 @@ header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;backgrou
 .sw.p{background:var(--orange)}.sw.c{background:var(--black)}.sw.d{background:var(--sand)}
 
 /* Spine */
-.spine{position:relative;display:grid;gap:16px;padding-left:40px}
+.spine{position:relative;display:grid;gap:22px;padding-left:40px}
 .spine::before{content:"";position:absolute;left:13px;top:8px;bottom:8px;width:2px;background:var(--g200)}
 .spine .fill{position:absolute;left:13px;top:8px;width:2px;background:var(--orange);height:0;transition:height .15s linear}
 
 .stage{position:relative;background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.05);border-top:3px solid transparent;transition:opacity .25s,border-color .2s,box-shadow .2s}
 .stage:hover{border-top-color:var(--orange)}
 .stage.open{box-shadow:0 8px 28px rgba(0,0,0,.07);border-top-color:var(--orange)}
-.stage::before{content:attr(data-n);position:absolute;left:-40px;top:16px;width:28px;height:28px;border-radius:50%;font-weight:600;font-size:12.5px;line-height:28px;text-align:center;background:var(--mk);color:var(--mk-fg);font-variant-numeric:tabular-nums}
+.stage::before{content:attr(data-n);position:absolute;left:-40px;top:21px;width:28px;height:28px;border-radius:50%;font-weight:600;font-size:12.5px;line-height:28px;text-align:center;background:var(--mk);color:var(--mk-fg);font-variant-numeric:tabular-nums}
 .stage[data-owner="platform"]{--mk-t:#B9470A;--mk:var(--orange);--mk-fg:var(--white);--bd-bg:var(--orange-tint);--bd-fg:#B9470A}
 .stage[data-owner="code"]{--mk-t:var(--black);--mk:var(--black);--mk-fg:var(--white);--bd-bg:var(--black);--bd-fg:var(--white)}
 .stage[data-owner="data"]{--mk-t:var(--g600);--mk:var(--sand);--mk-fg:var(--black);--bd-bg:var(--sand-tint);--bd-fg:var(--g600)}
 .stage.current{box-shadow:0 0 0 3px rgba(250,102,15,.25)}
-.head{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;text-align:left;background:none;border:0;padding:15px 18px;cursor:pointer}
+.head{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;text-align:left;background:none;border:0;padding:20px 24px;cursor:pointer}
 .head h2{font-size:20px}
 .head .sum{grid-column:1/-1;color:var(--g500);font-size:14.5px}
 .hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
@@ -72,7 +73,7 @@ header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;backgrou
 .where{font-size:11.5px;color:var(--g500);border:1px solid var(--g200);border-radius:999px;padding:2px 9px;white-space:nowrap}
 .chev{width:16px;height:16px;transition:transform .2s;color:var(--g500);flex:none}
 .stage.open .chev{transform:rotate(180deg)}
-.body{padding:2px 18px 20px;display:grid;gap:16px}
+.body{padding:4px 24px 28px;display:grid;gap:22px}
 .body ul{margin:0;padding-left:18px;display:grid;gap:6px}
 .body li{max-width:76ch}
 .body li b{font-weight:600}
@@ -186,10 +187,12 @@ header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;backgrou
 .tiles b{display:block;font-weight:600;margin-bottom:2px}
 
 /* Centrepiece */
-.centre{border-radius:var(--r);padding:20px;background:var(--g100);display:grid;gap:10px;margin-left:-40px;border:1px solid var(--g200)}
-.centre h2{font-size:26px}
+.centre{border-radius:var(--r);padding:22px 24px;background:var(--g100);display:grid;gap:10px;margin-left:-40px;border:1px solid var(--g200)}
+.centre .scroll{justify-self:center;width:100%;max-width:620px}
+.centre .scroll svg{min-width:520px}
+.centre h2{font-size:21px}
 .centre h2 em{font-style:normal;color:var(--orange)}
-.centre p{margin:0;color:var(--g600);max-width:70ch}
+.centre p{margin:0;color:var(--g600);max-width:72ch;font-size:14.5px}
 .blk{cursor:help}
 
 
@@ -197,7 +200,7 @@ header.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:20;backgrou
 /* Hero panel */
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-.overview{margin-bottom:36px;background:var(--g100);border:1px solid var(--g200);border-radius:14px;padding:clamp(16px,3vw,28px);display:grid;gap:14px;position:relative;overflow:hidden}
+.overview{margin-bottom:64px;background:var(--g100);border:1px solid var(--g200);border-radius:14px;padding:clamp(16px,3vw,28px);display:grid;gap:14px;position:relative;overflow:hidden}
 .overview::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--orange)}
 .ov-top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
 .ov-top > div{display:grid;gap:6px;min-width:0}
@@ -261,7 +264,7 @@ html{scroll-behavior:smooth}
 .stage:hover .head h2{color:var(--orange)}
 
 /* phase labels on the spine */
-.phase{position:relative;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--g500);margin-top:14px}
+.phase{position:relative;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--g500);margin-top:34px}
 .phase::before{content:"";position:absolute;left:-31px;width:10px;height:10px;border-radius:2px;transform:rotate(45deg);background:var(--g300)}
 .phase::after{content:"";flex:1;height:1px;background:var(--g200)}
 .phase:first-of-type{margin-top:0}
@@ -272,7 +275,7 @@ html{scroll-behavior:smooth}
 footer{margin-top:28px;font-size:12.5px;color:var(--g500);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
 .kbd{font-size:11px;border:1px solid var(--g300);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--white)}
 </style>
-<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<style>img{max-width:100%}</style>
 </head>
 <body>
 <header class="nav">
@@ -517,9 +520,7 @@ footer{margin-top:28px;font-size:12.5px;color:var(--g500);display:flex;flex-wrap
     <!-- CENTREPIECE -->
     <section class="centre" id="centre" aria-labelledby="c-h">
       <h2 id="c-h">One database, <em>used two ways</em></h2>
-      <p>The app reads and writes its own database for day-to-day work. SIP connects to that same database as one of the app's data sources and reads it in place through federated query, with no ETL. Questions from the app reach SIP over MCP, and SIP's workflows act through the app's MCP action tools.</p>
-      <p>When it helps, SIP can also import data into its own Iceberg store on the file system. That is the idea of an intelligent warehouse: built from what users actually ask for, rather than an ETL designed in advance.</p>
-      <p>The app's dashboards and numbers also come from SIP, with the user's security applied: each person sees only the pipeline they're allowed to see, and an administrator sees all of it.</p>
+      <p>The app reads and writes its own database. SIP reads the same database in place through federated query, with no ETL, and can import data into an Iceberg store when that helps. Questions and workflow actions pass over MCP, and the app's dashboards come from SIP with each user's security applied.</p>
       <div class="scroll">
         <svg viewBox="0 0 760 340" role="img" aria-label="The app reads and writes its own database. SIP reads the same database in place through federated query, and can optionally import data into an Iceberg store. Questions and workflow actions between SIP and the app go through MCP.">
           <defs>
@@ -552,7 +553,7 @@ footer{margin-top:28px;font-size:12.5px;color:var(--g500);display:flex;flex-wrap
               <text x="644" y="144" text-anchor="middle" font-size="12.5" fill="#FFFFFF">governance · workflows</text>
               <text x="644" y="162" text-anchor="middle" font-size="12.5" fill="#FFFFFF">Sentinel</text>
             </g>
-            <g class="blk" data-tip="Optional. Data SIP imports is stored in Iceberg on the file system, not held in memory; memory is used only to execute queries.">
+            <g class="blk" data-tip="Optional. Imported data is stored in Iceberg on the file system; memory is used only to run queries. An intelligent warehouse, built from what users actually ask for.">
               <rect x="424" y="256" width="196" height="64" rx="8" fill="#FFFFFF" stroke="#FA660F" stroke-width="1.5" stroke-dasharray="5 4"/>
               <text x="522" y="283" text-anchor="middle" font-weight="600" font-size="14.5" fill="#000000">Iceberg store</text>
               <text x="522" y="302" text-anchor="middle" font-size="12" fill="#717171">imported data · file system</text>
@@ -947,7 +948,6 @@ footer{margin-top:28px;font-size:12.5px;color:var(--g500);display:flex;flex-wrap
     stages[current].scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto':'smooth', block:'start'});
   }
   stages.forEach((st,i)=>st.querySelector('.head').addEventListener('click',()=>{ const o=!st.classList.contains('open'); setOpen(st,o); current=i; if(o) setTimeout(()=>settle(st),120); }));
-  setOpen(stages[2], true, false);
 
   const expandBtn = document.getElementById('expandAll');
   expandBtn.addEventListener('click',()=>{
